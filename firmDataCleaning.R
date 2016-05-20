@@ -1,7 +1,7 @@
                                                 #!!!!!!!!!!!!!ALERT LIST!!!!!!!!!!!!!!#                                                                                                                    The list of all the changes that are being made in this file that need to be either adequately explained or changed before proceeding
                                                 #!!!!!!!!!!!!!ALERT LIST!!!!!!!!!!!!!!#
 
-# 4. A few specific firm ids are removed manually. This seems sketchy. It should ideally be filtered out using a criteria.
+# 4. A few specific firm ids are removed manually. This seems sketchy. It should ideally be filtered out using a criteria.asdfs
 
 
 rm(list = ls())
@@ -21,7 +21,7 @@ firmData <- mutate(firmData, number_id = as.factor(number_id), year = as.integer
 ## REMOVING SPECIFIC FIRMS (CHECK ALERTS)
 firmData <- tbl_df(firmData) %>% filter(!number_id %in% c(998655, 12213, 58027, 10736, 23430, 148, 276, 310, 9278, 10737, 10920, 11001, 11163, 11164, 11184, 11195, 30452, 46016, 10852, 12034, 12204, 18291, 130910, 11914))
 
-                                                ############ SECTION: 2 ###########                                                                                                              CREATE NEW VARIABLES                                                                                                     ###################################
+                                                ############ SECTION: 2 ###########                                                                                                              CREATE NEW VARIABLES                                                                                                         ###################################
 ##EXIT_YEAR VARIABLE. Exit variable that marks the year that a firm become inactive. An additional year is added to the end of every firm that exited in order to calculate job flows.
 firmData <- group_by(firmData, number_id) %>% mutate(opLead1 = lead(operatingrevenueturnover, 1), opLead2 = lead(operatingrevenueturnover, 2)) %>% ungroup() %>%  mutate(exit_year = ifelse((status_reason != 1 & year < 2011 & (opLead1 == 0 | is.na(opLead1)) & (opLead2 == 0 | is.na(opLead2))), year, NA)) %>% group_by(number_id) %>% mutate(exit_year = max(exit_year, na.rm = T)) %>% filter(year <= (exit_year + 1) | is.na(exit_year)) %>% select(-opLead1, -opLead2) %>% ungroup()
 
