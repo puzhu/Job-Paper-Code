@@ -6,7 +6,7 @@
 
 rm(list = ls())
 setwd("~/Documents/Jobs Paper")
-library(foreign); library(dplyr);
+library(foreign); library(dplyr); library(data.table)
 
 ## LOADING THE STATA FILE
 firmData <- read.dta("Data/global_detail_all.dta")
@@ -16,16 +16,14 @@ firmData <- read.dta("Data/global_detail_all.dta")
 firmData <- tbl_df(firmData) %>% select(number_id, year, dateofincorporation, age, region, isic, status_reason, size, operatingrevenueturnover, tangiblefixedassets, operatingprofitloss, numberofemployees) %>% group_by(number_id, year) %>% arrange(year) %>% ungroup()
 
 ##Cleaning the variables
-firmData <- mutate(firmData, number_id = as.factor(number_id), year = as.integer(year), dateofincorporation = as.integer(dateofincorporation), region = as.factor(region), isic = as.integer(isic), size = as.factor(size))
+firmData <- mutate(firmData, number_id = as.numeric(number_id), year = as.integer(year), dateofincorporation = as.integer(dateofincorporation), region = as.factor(region), isic = as.integer(isic), size = as.factor(size))
 
 ## REMOVING SPECIFIC FIRMS (CHECK ALERTS)
 firmData <- tbl_df(firmData) %>% filter(!number_id %in% c(998655, 12213, 58027, 10736, 23430, 148, 276, 310, 9278, 10737, 10920, 11001, 11163, 11164, 11184, 11195, 30452, 46016, 10852, 12034, 12204, 18291, 130910, 11914))
 
                                                 ############ SECTION: 2 ###########                                                                                                              CREATE NEW VARIABLES                                                                                                         ###################################
 ##EXIT_YEAR VARIABLE. Exit variable that marks the year that a firm become inactive. An additional year is added to the end of every firm that exited in order to calculate job flows.
-firmData <- group_by(firmData, number_id) %>% mutate(opLead1 = lead(operatingrevenueturnover, 1), opLead2 = lead(operatingrevenueturnover, 2)) %>% ungroup() %>%  mutate(exit_year = ifelse((status_reason != 1 & year < 2011 & (opLead1 == 0 | is.na(opLead1)) & (opLead2 == 0 | is.na(opLead2))), year, NA)) %>% group_by(number_id) %>% mutate(exit_year = max(exit_year, na.rm = T)) %>% filter(year <= (exit_year + 1) | is.na(exit_year)) %>% select(-opLead1, -opLead2) %>% ungroup()
-
-# firmData <-  ungroup(firmData) %>%  mutate(exit_year = ifelse((status_reason != 1 & year < 2011), year, NA)) %>% group_by(number_id) %>% mutate(exit_year = max(exit_year, na.rm = T)) %>% filter(year <= exit_year | is.na(exit_year)) %>% ungroup()
+firmData <- group_by(firmData, number_id) %>% mutate(opLead1 = as.numeric(lead(operatingrevenueturnover, 1)), opLead2 = as.numeric(lead(operatingrevenueturnover, 2))) %>% ungroup() %>%  mutate(exit_year = as.integer(ifelse((status_reason != 1 & year < 2011 & (opLead1 == 0 | is.na(opLead1)) & (opLead2 == 0 | is.na(opLead2))), year, NA))) %>% group_by(number_id) %>% mutate(exit_year = as.integer(max(exit_year, na.rm = T))) %>% filter(year <= (exit_year) | is.na(exit_year)) %>% ungroup()
 
 ##Creating a ghost observation for the year after exit. With NA values for all variables other than the list below.
 temp <- group_by(firmData, number_id) %>% filter(year == exit_year) %>% mutate(year = year+1) %>% ungroup()
@@ -87,8 +85,6 @@ save(firmData, file = "Data/Saved Datasets/firmDataCleaned.RDA")
 
 
                                                         
-
-
 
 ## OLD CODE CHUNKS COMMENTED OUT AND KEPT FOR REFERENCE
 
