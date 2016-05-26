@@ -9,7 +9,7 @@ load("Data/Saved Datasets/firmDataCleaned.RDA")
 
 
 ##Dropping obs with missing controls. Selecting the years. Keeping only incumbents.
-firmData <- ungroup(firmData) %>% filter(year != 2011, year > 2003, !is.na(deltaEmp), !is.na(region), !is.na(isic), !is.na(grTrend), !is.na(laborreg2), !is.na(lagEmp), !is.na(age), !is.na(logKperLmean), !is.na(diffRevenue), !is.na(diffProfit)) %>% mutate(regYrIsicID = paste(as.character(region), as.character(year), as.character(isic), sep=''), secYrId = paste(as.character(isic), as.character(year), sep = ''))
+firmData <- ungroup(firmData) %>% filter(year != 2011, year > 2003, !is.na(deltaEmp), !is.na(region), !is.na(isic), !is.na(grTrend), !is.na(laborreg2), !is.na(lagEmp), !is.na(age), !is.na(logKperLmean), !is.na(diffRevenue), !is.na(diffProfit)) %>% mutate(regYrIsicID = paste(as.character(region), as.character(year), as.character(isic), sep=''), secYrId = paste(as.character(isic), as.character(year), sep = ''), regYrId = paste(as.character(region), as.character(year), sep = ''))
 
 ## Winsorizing the data
 lowBound <- quantile(firmData$deltaEmp, 0.01, na.rm = T)
@@ -34,7 +34,7 @@ model4 <- felm(deltaEmp ~ grTrend + grTrend*(laborreg2) + grTrend*(lagEmp)| fact
 #Reg 5
 model5 <- felm(deltaEmp ~ grTrend + grTrend*(laborreg2) + grTrend*(lagEmp) + grTrend*age + grTrend*logKperLmean| factor(secYrId)| 0 | regYrIsicID, data = firmData)
 
-stargazer(model1, model2, model3, model4, model5, add.lines = list(c("Fixed effects", "Year", "Year", "Sector * Year", "Sector * Year", "Sector * Year")), title = "Basic Specification", dep.var.labels = "Change in Employment", dep.var.caption = "", covariate.labels = c("Slump", "Surge", "Enforcement", "Lagged Employment", "Age","log(K/L)", "Slump*Enforcement", "Surge*Enforcement", "Slump*LagEmp", "Surge*LagEmp","Slump*Age", "Surge*Age", "Slump*log(K/L)","Surge*log(K/L)"), notes = "Errors clustered by Region*Year*Sector", type = "text", out = "Results/Tables/Basic Specification.txt")
+stargazer(model1, model2, model3, model4, model5, add.lines = list(c("Fixed effects", "Year", "Year", "Sector * Year", "Sector * Year", "Sector * Year")), title = "Basic Specification", dep.var.labels = "Change in Employment", dep.var.caption = "", covariate.labels = c("Slump", "Surge", "Enforcement", "Lagged Employment", "Age","log(K/L)", "Slump*Enforcement", "Surge*Enforcement", "Slump*LagEmp", "Surge*LagEmp","Slump*Age", "Surge*Age", "Slump*log(K/L)","Surge*log(K/L)"), notes = "Errors clustered by Region*Year*Sector", out = "Results/Tables/Basic Specification.html")
                                                 ############ Regression: 2 ###########                                                                                                            Firm FE + Year FE                                                                                                           ######################################
 # Reg 1
 model1 <- felm(deltaEmp ~ grTrend | factor(year) + factor(number_id) | 0 |regYrIsicID, data = firmData)
