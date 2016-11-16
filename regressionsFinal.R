@@ -8,23 +8,21 @@ load("Data/Saved Datasets/firmDataCleaned.RDA")
                                                 ############ Filtering and Summarizing data ###########                                                         Filter the data sequentially since some of the filters remove variables that we are interested in summarizing                                                                         ######################################
 
 
-##Dropping only the years in the first step of data cleaning (additional steps drop all firmtypes other than incumbent, so we won't be able to summarise those variables)
-firmData <- ungroup(firmData) %>% filter(year != 2011, year > 2003)
-
-##Dropping obs with missing controls. Selecting the years. Keeping only incumbents.
-firmData <- ungroup(firmData) %>% filter(!is.na(deltaEmp), !is.na(region), !is.na(isic), !is.na(grTrend), !is.na(laborreg2), !is.na(lagEmp), !is.na(age), !is.na(logKperLmean), !is.na(diffRevenue), !is.na(diffProfit)) %>% mutate(regYrIsicID = paste(as.character(region), as.character(year), as.character(isic), sep=''), secYrId = paste(as.character(isic), as.character(year), sep = ''), regYrId = paste(as.character(region), as.character(year), sep = ''))
-
-## Winsorizing the data
-lowBound <- quantile(firmData$deltaEmp, 0.01, na.rm = T)
-upBound <- quantile(firmData$deltaEmp, 0.99, na.rm = T)
-firmData <- ungroup(firmData) %>% mutate(deltaEmp = ifelse(is.na(deltaEmp), NA, ifelse(deltaEmp > upBound, upBound, ifelse(deltaEmp < lowBound, lowBound, deltaEmp))))
-
-##Keeping only the incumbent firms
-firmData <- ungroup(firmData) %>% filter(as.character(firmType) == "Incumbent")
-
-uniqueIds <- unique(firmData$number_id)
-##Selecting the firm ids that are represented in the sample (for summary tables)
-save(uniqueIds, file = "Data/Saved Datasets/firmIDs.RDA")
+# ##Dropping only the years in the first step of data cleaning (additional steps drop all firmtypes other than incumbent, so we won't be able to summarise those variables)
+# firmData <- ungroup(firmData) %>% filter(year != 2011, year > 2003)
+# 
+# ##Dropping obs with missing controls. Selecting the years. Keeping only incumbents.
+# firmData <- ungroup(firmData) %>% filter(!is.na(deltaEmp), !is.na(region), !is.na(isic), !is.na(grTrend), !is.na(laborreg2), !is.na(lagEmp), !is.na(age), !is.na(logKperLmean), !is.na(diffRevenue), !is.na(diffProfit)) %>% mutate(regYrIsicID = paste(as.character(region), as.character(year), as.character(isic), sep=''), secYrId = paste(as.character(isic), as.character(year), sep = ''), regYrId = paste(as.character(region), as.character(year), sep = ''))
+# 
+# ## Winsorizing the data
+# lowBound <- quantile(firmData$deltaEmp, 0.01, na.rm = T)
+# upBound <- quantile(firmData$deltaEmp, 0.99, na.rm = T)
+# firmData <- ungroup(firmData) %>% mutate(deltaEmp = ifelse(is.na(deltaEmp), NA, ifelse(deltaEmp > upBound, upBound, ifelse(deltaEmp < lowBound, lowBound, deltaEmp))))
+# 
+# ##Keeping only the incumbent firms
+# firmData <- ungroup(firmData) %>% filter(as.character(firmType) == "Incumbent")
+# 
+# 
 
                                                 ############ Regional Correlation ###########                                                                          This section creates a correlation table between regional characteristics and the enforcement variable                                                               #################################################
 
